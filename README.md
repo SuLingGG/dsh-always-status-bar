@@ -67,8 +67,11 @@ dsh plugin --profile web add git+https://github.com/SuLingGG/dsh-always-status-b
 在安装时无事可做，也就不会索要 `allowBuilds` 许可。
 
 > 若你装的是 `v0.1.1` 或更早的 ref（带 `prepare`），pnpm ≥10 会以
-> `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED` 拒绝，除非把 `dsh-always-status-bar: true` 加进
-> profile 的 `pnpm-workspace.yaml` 的 `allowBuilds`；`v0.1.2` 起不再需要。
+> `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED` 拒绝。该错误的 hint 会直接打印要写进 profile
+> `pnpm-workspace.yaml` 的 `allowBuilds` 键——注意**键不是包名**，而是
+> `dsh-always-status-bar@https://codeload.github.com/…/<commit>`（随 commit 变化，别手抄示例）。
+> 即使授权，pnpm 之后还要在那个临时目录里跑一次 `pnpm install` + `prepare` 才能构建，所以旧
+> ref 装起来明显更绕——直接用 `v0.1.2`+，或走下面的 tarball 方式（tarball 不跑任何构建脚本）。
 
 #### 2. 从 Release tarball 安装（同样不触发构建脚本）
 

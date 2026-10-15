@@ -16,7 +16,10 @@ approval.
   manifest's `main` entry is missing from the tarball — and `lib/index.js` is
   committed. So the allowlist entry is no longer part of the install story.
 - README: install instructions no longer mention `allowBuilds` for `v0.1.2`+,
-  and keep the one-line allowlist note for older refs (including `v0.1.1`).
+  and the note kept for older refs (including `v0.1.1`) now records that pnpm's
+  key is commit-scoped (`<name>@<codeload URL>`) rather than the package name,
+  and that authorizing it still leaves an install + `prepare` inside pnpm's
+  temp directory — so `v0.1.2`+ or a tarball is the recommended path.
 - Tests: the manifest suite now fails if a `prepare` script reappears, so the
   approval-free install cannot regress silently.
 
