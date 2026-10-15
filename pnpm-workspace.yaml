@@ -3,3 +3,7 @@
 # "set this to true or false").
 allowBuilds:
   esbuild: true
+
+# `@deepseek-ai/dsh` is a peer (the runtime host), never a real dependency.
+# Without this, pnpm auto-installs the whole DSH tree into the lockfile.
+autoInstallPeers: false

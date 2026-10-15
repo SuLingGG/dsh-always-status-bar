@@ -1,27 +1,47 @@
 /*
- * dsh-always-status-bar override.
+ * dsh-always-status-bar override — DSH >= 0.1.7-alpha.1.
  *
- * DSH renders every message's native status line — the user side
- * (`clock="start"`, CSS module class `timeStart`) and the assistant side
- * (`clock="end"`, class `timeEnd`) — inside a `data-time-hover-root` scope.
- * That single span carries the date | time and, for assistant messages, the
- * run-time readings (用时 / 首 token / tok/s). DSH hides the whole span with
- * `opacity: 0` inside `@media (hover: hover)`, revealing it on
- * `:hover` / `:focus-within` (ui-conversation `MessageIconActions.module.css`).
- * The span is always present in the DOM — only its opacity changes — so the
- * entire feature is this one rule: keep it at full opacity.
+ * DSH renders each message's native status line inside that message's action
+ * row (ui-chat `MessageIconActions`) and fades the WHOLE ROW — not the clock
+ * span — inside `@media (hover:hover)`:
  *
- * - `data-time-hover-root` is the stable semantic anchor DSH's own tests use.
- * - The CSS-module classes are hashed at build time (`[hash]_timeStart` /
- *   `[hash]_timeEnd`), but the local names are preserved, so the substring
- *   attribute selectors find exactly the status span — never the action
- *   buttons (copy / branch / third-party) that share the same row.
+ *   [data-actions-reveal=hover] .[hash]_actions,
+ *   :is([data-chat-flow-kind=user],[data-chat-flow-kind=steering])
+ *     :has(~:is([data-chat-flow-kind=user],[data-chat-flow-kind=steering])) .[hash]_actions
+ *     { opacity: 0; transition: opacity 80ms }
+ *
+ * revealed on `:hover` / `:focus-within`. Up to 0.1.x that sheet hid only the
+ * clock span and scoped it under `data-time-hover-root`; the attribute no
+ * longer exists (zero occurrences across the 0.2.0-rc.2 install), and because
+ * the row now animates as one unit a child `opacity: 1` cannot escape a parent
+ * `opacity: 0` — child opacity multiplies into the parent's. The row itself is
+ * therefore the only lever, so the row is what this sheet targets.
+ *
+ * `data-clock` (`"start"` | `"end"`) is the attribute DSH's own CSS already
+ * keys on, so it is a semantic hook rather than a build-hashed CSS-module class
+ * (`[hash]_[local]` renaming would invalidate the latter). Both arms below
+ * mirror the two native hide rules exactly with the row as the subject, so the
+ * plugin reveals precisely the rows DSH hides — and nothing else.
+ *
+ * One rule, one declaration:
  * - `!important` keeps the override above the native normal declaration
  *   regardless of stylesheet order (plugin bundles materialize concurrently,
  *   so order is not under this plugin's control).
- * - No other property changes: font, color, date/time format, spacing,
- *   alignment, and every action-button behavior stay native.
+ * - No `>` child combinator: slot entries such as the like/dislike pair hang
+ *   off a `display: contents` wrapper — invisible to layout, still a DOM node —
+ *   so any depth-sensitive selector would silently miss them.
+ * - Deliberately not wrapped in `@media (hover:hover)`: the native hide rules
+ *   are themselves hover-scoped, so where nothing is ever hidden this
+ *   declaration sets `opacity: 1` on a row that already is 1 (a no-op), and the
+ *   sheet stays a single rule.
+ * - Keeping the row visible keeps everything the row carries visible, action
+ *   buttons included (copy / branch / like / dislike). That is this plugin's
+ *   intent: one always-visible status row per message — the rendering DSH
+ *   already gives a row marked `data-actions-reveal="always"`.
+ * - No other property changes: font, color, date/time format, spacing and
+ *   alignment stay native.
  */
-[data-time-hover-root] :is([class*="timeStart"], [class*="timeEnd"]) {
+[data-actions-reveal=hover] [data-clock],
+:is([data-chat-flow-kind=user],[data-chat-flow-kind=steering]):has(~:is([data-chat-flow-kind=user],[data-chat-flow-kind=steering])) [data-clock] {
   opacity: 1 !important;
 }

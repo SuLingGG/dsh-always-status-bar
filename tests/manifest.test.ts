@@ -18,9 +18,15 @@ const pkg = JSON.parse(readFileSync(new URL('package.json', root), 'utf8')) as R
 const patch = readFileSync(new URL('cordis.patch.yml', root), 'utf8')
 
 describe('package manifest', () => {
-  it('is version 0.1.0 under the plugin name', () => {
+  it('is version 0.1.1 under the plugin name', () => {
     expect(pkg.name).toBe('dsh-always-status-bar')
-    expect(pkg.version).toBe('0.1.0')
+    expect(pkg.version).toBe('0.1.1')
+  })
+
+  it('declares the DSH runtime range the override is verified against', () => {
+    // data-clock, the override's only anchor, first ships in 0.1.7-alpha.1;
+    // DSH itself denies this row on anything older.
+    expect(pkg.peerDependencies?.['@deepseek-ai/dsh']).toBe('>=0.1.7-alpha.1')
   })
 
   it('declares the bundle patch and the web client manifest', () => {
@@ -63,7 +69,10 @@ describe('built artifacts', () => {
     expect(client).toContain(`id: "dsh-always-status-bar"`)
     expect(client).toContain('factory: (require) =>')
     expect(client).toContain('return module.exports')
-    expect(client).toContain('[data-time-hover-root]')
+    expect(client).toContain('[data-clock]')
+    // The retired anchor may still be named in the inlined stylesheet comment;
+    // what must never come back is using it as a selector.
+    expect(client).not.toContain('[data-time-hover-root]')
     expect(client).not.toMatch(/^\s*(import|export)\s/m)
   })
 
