@@ -18,9 +18,24 @@ const pkg = JSON.parse(readFileSync(new URL('package.json', root), 'utf8')) as R
 const patch = readFileSync(new URL('cordis.patch.yml', root), 'utf8')
 
 describe('package manifest', () => {
-  it('is version 0.1.1 under the plugin name', () => {
+  it('is version 0.1.2 under the plugin name', () => {
     expect(pkg.name).toBe('dsh-always-status-bar')
-    expect(pkg.version).toBe('0.1.1')
+    expect(pkg.version).toBe('0.1.2')
+  })
+
+  it('declares no `prepare` script, so a git install needs no build approval', () => {
+    // pnpm >= 10 refuses a git-hosted dependency that declares `prepare` unless
+    // the consuming profile allowlists it:
+    //   ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED
+    // Nothing needs building at install time — `lib/` is committed — so the
+    // hook is deliberately absent, and `dsh plugin add github:...` works with
+    // no allowBuilds entry. `prepack` still rebuilds for `npm pack`/`publish`,
+    // and pnpm skips the prepublish-family hooks anyway when the declared
+    // `main` entry already exists in the fetched tree.
+    expect(pkg.scripts?.prepare).toBeUndefined()
+    expect(pkg.scripts?.prepack).toBe('node build.mjs')
+    // The gate's escape hatch depends on this file actually being committed.
+    expect(existsSync(new URL('lib/index.js', root))).toBe(true)
   })
 
   it('declares the DSH runtime range the override is verified against', () => {

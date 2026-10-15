@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.1.2 — 2026-10-15
+
+Make `dsh plugin add github:SuLingGG/dsh-always-status-bar` work with no build
+approval.
+
+- **Fixed**: pnpm ≥ 10 refused the git install with
+  `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED` — a git-hosted dependency that declares
+  `prepare` must be allowlisted in the consuming profile's `pnpm-workspace.yaml`
+  (`allowBuilds`). Dropped the `prepare` hook: `lib/` is committed, so nothing
+  needs building at install time. `prepack` still rebuilds on
+  `npm pack`/`publish`, and `pnpm test`/`pnpm run build` still build locally.
+- The gate turns out to be skippable by design: pnpm only builds a fetched tree
+  when `prepare` is set, or when a prepublish-family hook is set *and* the
+  manifest's `main` entry is missing from the tarball — and `lib/index.js` is
+  committed. So the allowlist entry is no longer part of the install story.
+- README: install instructions no longer mention `allowBuilds` for `v0.1.2`+,
+  and keep the one-line allowlist note for older refs (including `v0.1.1`).
+- Tests: the manifest suite now fails if a `prepare` script reappears, so the
+  approval-free install cannot regress silently.
+
 ## 0.1.1 — 2026-10-15
 
 Re-anchor the override on DSH ≥ 0.1.7-alpha.1, where DSH fades the whole action
