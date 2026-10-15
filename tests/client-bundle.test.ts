@@ -85,7 +85,7 @@ describe('built client bundle', () => {
     const tags = styleTags()
     expect(tags).toHaveLength(1)
     expect(tags[0]!.getAttribute('data-plugin-css')).toBe('dsh-always-status-bar/always-status-bar.css')
-    expect(tags[0]!.textContent).toContain('[data-time-hover-root]')
+    expect(tags[0]!.textContent).toContain('[data-clock]')
     expect(tags[0]!.textContent).toContain('opacity: 1 !important')
   })
 

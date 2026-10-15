@@ -1,6 +1,6 @@
 {
   "name": "dsh-always-status-bar",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DSH Web UI plugin: keep the native per-message status line (date | time, run duration, TTFT, tokens/s) always visible without hovering",
   "keywords": [
     "dsh",
@@ -10,13 +10,13 @@
     "ui",
     "status-bar"
   ],
-  "homepage": "https://github.com/Bobnemimimmi/dsh-always-status-bar#readme",
+  "homepage": "https://github.com/SuLingGG/dsh-always-status-bar#readme",
   "bugs": {
-    "url": "https://github.com/Bobnemimimmi/dsh-always-status-bar/issues"
+    "url": "https://github.com/SuLingGG/dsh-always-status-bar/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Bobnemimimmi/dsh-always-status-bar.git"
+    "url": "git+https://github.com/SuLingGG/dsh-always-status-bar.git"
   },
   "license": "MIT",
   "author": "Bobnemimimmi <haoran020924@gmail.com>",
@@ -43,6 +43,9 @@
     "client": {
       "platform": "web"
     }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh": ">=0.1.7-alpha.1"
   },
   "scripts": {
     "build": "node build.mjs",
