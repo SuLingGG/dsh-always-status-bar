@@ -59,25 +59,31 @@
 dsh plugin --profile web add github:SuLingGG/dsh-always-status-bar
 
 # 或锁定 tag / commit（可复现）
-dsh plugin --profile web add github:SuLingGG/dsh-always-status-bar#v0.1.1
+dsh plugin --profile web add github:SuLingGG/dsh-always-status-bar#v0.1.2
 dsh plugin --profile web add git+https://github.com/SuLingGG/dsh-always-status-bar.git#<commit-sha>
 ```
 
-本包带 `prepare` 自构建；pnpm ≥10 首次 `add` 可能拒绝并要求授权，按提示把打印出来的 `allowBuilds`
-键加进 profile 的 `pnpm-workspace.yaml` 后重跑即可。构建产物 `lib/` 已随仓库一起提交，所以
-**即使授权被拒也能正常加载**，授权只是让构建再跑一遍。
+**不需要任何构建授权。** 本包不声明 `prepare`，而构建产物 `lib/` 已随仓库一起提交，所以 pnpm
+在安装时无事可做，也就不会索要 `allowBuilds` 许可。
 
-#### 2. 从 Release tarball 安装（不触发任何构建脚本）
+> 若你装的是 `v0.1.1` 或更早的 ref（带 `prepare`），pnpm ≥10 会以
+> `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED` 拒绝。该错误的 hint 会直接打印要写进 profile
+> `pnpm-workspace.yaml` 的 `allowBuilds` 键——注意**键不是包名**，而是
+> `dsh-always-status-bar@https://codeload.github.com/…/<commit>`（随 commit 变化，别手抄示例）。
+> 即使授权，pnpm 之后还要在那个临时目录里跑一次 `pnpm install` + `prepare` 才能构建，所以旧
+> ref 装起来明显更绕——直接用 `v0.1.2`+，或走下面的 tarball 方式（tarball 不跑任何构建脚本）。
+
+#### 2. 从 Release tarball 安装（同样不触发构建脚本）
 
 ```sh
 # 在仓库根目录生成产物；prepack 会先跑一次 build.mjs
-npm pack        # -> dsh-always-status-bar-0.1.1.tgz
+npm pack        # -> dsh-always-status-bar-0.1.2.tgz
 ```
 
 把该 tarball 上传到 GitHub Release，然后：
 
 ```sh
-dsh plugin --profile web add https://github.com/SuLingGG/dsh-always-status-bar/releases/download/v0.1.1/dsh-always-status-bar-0.1.1.tgz
+dsh plugin --profile web add https://github.com/SuLingGG/dsh-always-status-bar/releases/download/v0.1.2/dsh-always-status-bar-0.1.2.tgz
 ```
 
 #### 3. 本地目录 / tarball
@@ -98,7 +104,7 @@ grep -n always-status-bar ~/.dsh/profiles/web/package.json
 
 > **不要用 npm 上的 `dsh-always-status-bar`**：那里目前只有上游未修复的 `0.1.0`，在
 > DSH ≥ `0.1.2-alpha.2` 上是空操作（它锚定的 `data-time-hover-root` 已不存在）。
-> 在 `0.1.1` 发布到 npm 之前，请用上面的 GitHub / tarball 方式安装。
+> 在 `0.1.2` 发布到 npm 之前，请用上面的 GitHub / tarball 方式安装。
 
 ### 卸载
 
@@ -134,7 +140,13 @@ DSH 迭代较快；升级后若状态栏未常驻显示，先核对 `[data-clock
 pnpm install
 pnpm run typecheck
 pnpm test          # 构建 + vitest
+pnpm run build     # 只重建 lib/
 ```
+
+`lib/` 是**提交进仓库**的产物，本包也刻意不声明 `prepare`（否则 pnpm ≥10 会对每个 git 安装索要
+`allowBuilds` 授权）。因此改完 `src/` 后要显式跑 `pnpm run build` 或 `pnpm test`——`pnpm install`
+不会再顺手重建；`npm pack`/`publish` 仍由 `prepack` 保证产物是新的。改完请确认
+`git status --porcelain` 为空，即提交的 `lib/` 与源码一致。
 
 `pnpm test` 里的 CSS 契约测试是**静态**断言（解析选择器与声明），校验的是规则的形状而非
 层叠结果；真正的可见性行为由上面 Requirements 所述的逐版本真机夹具验证。
